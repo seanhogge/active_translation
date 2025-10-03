@@ -8,7 +8,7 @@ class CreateTranslations < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :translations, [ :translatable_type, :translatable_id, :locale ],
+    add_index :active_translation_translations, [ :translatable_type, :translatable_id, :locale ],
               unique: true, name: "index_translations_on_translatable_and_locale"
   end
 end
