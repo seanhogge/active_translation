@@ -111,7 +111,7 @@ module ActiveTranslation
       Digest::MD5.hexdigest(values.join)
     end
 
-    # private
+    private
 
     def condition_checks_changed?
       saved_changes.any? && conditions_exist? && conditions_met?
