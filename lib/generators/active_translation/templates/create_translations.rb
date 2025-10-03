@@ -1,6 +1,6 @@
 class CreateTranslations < ActiveRecord::Migration[7.0]
   def change
-    create_table :translations do |t|
+    create_table :active_translation_translations do |t|
       t.references :translatable, polymorphic: true, null: false
       t.string :locale, null: false
       t.text :translated_attributes # serialized JSON

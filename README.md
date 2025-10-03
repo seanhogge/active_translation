@@ -67,35 +67,35 @@ Simplest form:
 translates :content, into: %i[es fr de]
 ```
 
-### Only Constraints
+### If Constraints
 
-An `only` constraint will prevent translating if it returns `false`.
+An `if` constraint will prevent translating if it returns `false`.
 
 If you have a boolean column like `published`, you might do:
 
 ```ruby
-translates :content, into: %i[es fr de], only: :published?
+translates :content, into: %i[es fr de], if: :published?
 ```
 
 Or you can define your own method that returns a boolean:
 
 ```ruby
-translates :content, into: %i[es fr de], only: :record_should_be_translated?
+translates :content, into: %i[es fr de], if: :record_should_be_translated?
 ```
 
-Or you can use a simple Proc:
+Or you can use a Proc:
 
 ```ruby
-translates :content, into: %i[es fr de], only: -> { content.length > 10 }
+translates :content, into: %i[es fr de], if: -> { content.length > 10 }
 ```
 
 ### Unless Constraints
 
-These work exactly the same as the `only` constraint, but the logic is flipped. If the constraint returns `true` then no translating will take place.
+These work exactly the same as the `if` constraint, but the logic is flipped. If the constraint returns `true` then no translating will take place.
 
 ### Constraint Compliance
 
-If your record is updated such that either an `only` or `unless` constraint is toggled, this will trigger the addition _or removal_ of translation data. The idea here is that the constraint controls whether a translation should _exist_, not whether a translation should be performed.
+If your record is updated such that either an `if` or `unless` constraint is toggled, this will trigger the addition _or removal_ of translation data. The idea here is that the constraint controls whether a translation should _exist_, not whether a translation should be performed.
 
 This means if you use a constraint that frequently changes value, you will be paying for half of all change events.
 

@@ -1,3 +1,5 @@
+require "test_helper"
+
 class TranslatableTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
@@ -22,19 +24,17 @@ class TranslatableTest < ActiveSupport::TestCase
 
   test "a model is not translated when a non-translated attribute changes" do
     category = categories(:admin)
+    category.translate_now!
 
-    assert_empty category.translations, "SETUP: the category record should start with no translations".black.on_yellow
+    category.reload
+    assert_not category.translations_outdated?, "SETUP: the category record should start fully translated".black.on_yellow
 
-    perform_enqueued_jobs do
-      category.update path: :asdf
-    end
+    category.update path: :asdf
 
-    assert_empty category.translations, "The category record should not have translations after updating the path".black.on_red
-    assert_nil category.fr_translation, "The category should have an fr_translation after updating the name".black.on_red
-    assert_nil category.es_translation, "The category should have an es_translation after updating the name".black.on_red
+    assert_not category.translations_outdated?, "The category record should not have outdated translations after updating the path".black.on_red
   end
 
-  test "a model with an only constraint is translated when it's toggled to true, and untranslated when toggled to false" do
+  test "a model with an if constraint is translated when it's toggled to true, and untranslated when toggled to false" do
     page = pages(:home_page)
 
     perform_enqueued_jobs do
@@ -58,7 +58,7 @@ class TranslatableTest < ActiveSupport::TestCase
     assert_empty page.translations, "Toggling the only constraint to false should destroy existing translations".black.on_red
   end
 
-  test "a model with an unless constraint is translated when it's toggled to false, and untranslated when toggled to true" do
+  test "a model with an unless (proc) constraint is translated when it's toggled to false, and untranslated when toggled to true" do
     job = jobs(:chef)
 
     perform_enqueued_jobs do
@@ -98,7 +98,7 @@ class TranslatableTest < ActiveSupport::TestCase
     assert_empty employer.translations, "Creating a new employer with no profile_html should not trigger translations".black.on_red
   end
 
-  test "changing auto translation attributes works as expected" do
+  test "changing auto translation attributes triggers retranslation" do
     employer = employers(:hilton)
 
     perform_enqueued_jobs do
@@ -117,5 +117,75 @@ class TranslatableTest < ActiveSupport::TestCase
 
     assert_equal "[fr] second profile update", employer.profile_html(locale: :fr), "A second update to an auto translated attribute should be correctly saved".black.on_red
     assert_equal "[es] second profile update", employer.profile_html(locale: :es), "A second update to an auto translated attribute should be correctly saved".black.on_red
+  end
+
+  test "translations_outdated? doesn't check missing translations" do
+    employer = employers(:hilton)
+
+    assert_not employer.translations_outdated?
+  end
+
+  test "translate_if_needed can be called outside a callback without errors" do
+    employer = employers(:hilton)
+    employer.translations.delete_all
+
+    assert employer.translations.none?
+
+    perform_enqueued_jobs do
+      employer.translate_if_needed
+    end
+
+    assert employer.reload.translations.none?
+  end
+
+  test "a model and an instance of it both respond to translatable_locales with the value from the 'into' argument of the 'translates' method" do
+    # employers(:hilton) has two locales: es and fr
+    assert Employer.translatable_locales == employers(:hilton).translatable_locales
+    assert Employer.translatable_locales == [ :es, :fr ]
+    assert employers(:hilton).translatable_locales == [ :es, :fr ]
+  end
+
+  test "a model can be translated on demand asynchronously" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations
+
+    employer.translatable_locales.each do |locale|
+      assert_nil employer.send("#{locale}_translation")
+    end
+
+    perform_enqueued_jobs do
+      employer.translate_now!
+    end
+
+    employer.translatable_locales.each do |locale|
+      assert employer.send("#{locale}_translation")
+    end
+  end
+
+  test "a model can be translated on demand synchronously" do
+    employer = employers(:hilton)
+    locales = employer.translatable_locales
+
+    assert_empty employer.translations
+
+    locales.each do |locale|
+      assert_nil employer.send("#{locale}_translation")
+    end
+
+    locales.each do |locale|
+      employer.translate_now!
+      assert employer.send("#{locale}_translation")
+    end
+  end
+
+  test "translate_if_needed does not retranslate if updated with identical content previously translated" do
+    employer = employers(:hilton)
+    employer.translate_now!
+    assert_not employer.translations_outdated?, "SETUP: The employer should start with up-to-date translations".black.on_yellow
+
+    assert_no_enqueued_jobs do
+      employer.update profile_html: employer.profile_html
+    end
   end
 end

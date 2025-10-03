@@ -2,20 +2,16 @@ module ActiveTranslation
   class TranslationJob < ActiveJob::Base
     queue_as :default
 
-    def perform(model_class, record_id, locale, checksum)
-      model = model_class.safe_constantize.find(record_id)
-      config = model.class.translation_config
-
+    def perform(object, locale, checksum)
       translated_data = {}
-      config[:attributes].each do |attr|
-        source_text = model.read_attribute(attr)
-        translated_data[attr.to_s] = translate_text(source_text, locale)
+
+      object.translatable_attributes.each do |attribute|
+        source_text = object.read_attribute(attribute)
+        translated_data[attribute.to_s] = translate_text(source_text, locale)
       end
 
-      translation = model.translations
+      translation = object.translations
         .find_or_initialize_by(
-          translatable_type: model_class,
-          translatable_id: model.id,
           locale: locale,
         )
 
