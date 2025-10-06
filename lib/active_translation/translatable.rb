@@ -111,6 +111,12 @@ module ActiveTranslation
       Digest::MD5.hexdigest(values.join)
     end
 
+    def translations_outdated?
+      return true if translations.map(&:outdated?).any?
+
+      false
+    end
+
     private
 
     def condition_checks_changed?
@@ -150,12 +156,6 @@ module ActiveTranslation
 
     def translatable_attributes_changed?
       saved_changes.any? && saved_changes.keys.intersect?(translatable_attributes.map(&:to_s))
-    end
-
-    def translations_outdated?
-      return true if translations.map(&:outdated?).any?
-
-      false
     end
 
     # returns true if condition is met or there is no condition
