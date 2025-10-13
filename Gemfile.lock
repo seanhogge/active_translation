@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_translation (0.4.0)
+    active_translation (0.5.0)
       activerecord (>= 7)
       faraday
       googleauth
