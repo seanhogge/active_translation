@@ -25,6 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", ">= 7"
   spec.add_dependency "activerecord", ">= 7"
   spec.add_dependency "faraday"
-  spec.add_dependency "faraday_middleware"
+  # spec.add_dependency "faraday_middleware"
   spec.add_dependency "googleauth"
 end
