@@ -127,7 +127,6 @@ class TranslatableTest < ActiveSupport::TestCase
 
   test "translate_if_needed can be called outside a callback without errors" do
     employer = employers(:hilton)
-    employer.translations.delete_all
 
     assert employer.translations.none?
 
@@ -135,7 +134,13 @@ class TranslatableTest < ActiveSupport::TestCase
       employer.translate_if_needed
     end
 
-    assert employer.reload.translations.none?
+    employer.reload
+    assert_not_empty employer.translations
+
+    # call it again to cover the case where translations already exist
+    perform_enqueued_jobs do
+      employer.translate_if_needed
+    end
   end
 
   test "a model and an instance of it both respond to translatable_locales with the value from the 'into' argument of the 'translates' method" do

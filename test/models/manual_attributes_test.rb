@@ -4,14 +4,29 @@ class ManualAttributesTest < ActiveSupport::TestCase
   setup do
   end
 
-  test "manual attribute changes don't trigger translations" do
+  test "manual attribute changes don't trigger translations for the manual attribute" do
     employer = employers(:hilton)
+    employer.translate_now!
+
+    employer.translatable_locales.each do |locale|
+      assert_not_includes(
+        JSON.parse(employer.translations.find_by(locale: locale).translated_attributes).keys,
+        "name",
+        "SETUP: An employer should not have a translated name to start".black.on_yellow
+      )
+    end
 
     perform_enqueued_jobs do
       employer.update name: "new name"
     end
 
-    assert_empty employer.translations, "An employer should not have translations after a name change".black.on_red
+    employer.translatable_locales.each do |locale|
+      assert_not_includes(
+        JSON.parse(employer.translations.find_by(locale: locale).translated_attributes).keys,
+        "name",
+        "SETUP: An employer should not have a translated name to start".black.on_yellow
+      )
+    end
   end
 
   test "manual attributes can be set manually, and don't trigger translations or checksum updates" do

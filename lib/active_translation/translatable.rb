@@ -14,7 +14,7 @@ module ActiveTranslation
         has_many :translations, class_name: "ActiveTranslation::Translation", as: :translatable, dependent: :destroy
 
         delegate :translation_config, to: :class
-        delegate :translatable_attributes, to: :class
+        delegate :translatable_attribute_names, to: :class
         delegate :translatable_locales, to: :class
 
         after_commit :translate_if_needed, on: [ :create, :update ]
@@ -67,7 +67,7 @@ module ActiveTranslation
         end
       end
 
-      def translatable_attributes
+      def translatable_attribute_names
         translation_config[:attributes]
       end
 
@@ -83,7 +83,7 @@ module ActiveTranslation
     def translate_if_needed
       translations.delete_all and return unless conditions_met?
 
-      return unless translatable_attributes_changed? || condition_checks_changed? || translations_outdated?
+      return unless translatable_attributes_changed? || condition_checks_changed? || translations_outdated? || translations_missing?
 
       translatable_locales.each do |locale|
         translation = translations.find_or_initialize_by(locale: locale.to_s)
@@ -107,8 +107,23 @@ module ActiveTranslation
     end
 
     def translation_checksum
-      values = translatable_attributes.map { |attr| read_attribute(attr).to_s }
+      values = translatable_attribute_names.map { |attr| read_attribute(attr).to_s }
       Digest::MD5.hexdigest(values.join)
+    end
+
+    # translations are "missing" if they are not manual, the translatable attribute isn't blank
+    # and there's no translation for that attribute for all locales
+    def translations_missing?
+      translatable_locales.each do |locale|
+        translatable_attribute_names.each do |attribute|
+          next if read_attribute(attribute).blank?
+
+          return true unless translation = translations.find_by(locale: locale)
+          return true unless JSON.parse(translation.translated_attributes).keys.include?(attribute)
+        end
+      end
+
+      false
     end
 
     def translations_outdated?
@@ -155,7 +170,7 @@ module ActiveTranslation
     end
 
     def translatable_attributes_changed?
-      saved_changes.any? && saved_changes.keys.intersect?(translatable_attributes.map(&:to_s))
+      saved_changes.any? && saved_changes.keys.intersect?(translatable_attribute_names.map(&:to_s))
     end
 
     # returns true if condition is met or there is no condition

@@ -5,7 +5,7 @@ module ActiveTranslation
     def perform(object, locale, checksum)
       translated_data = {}
 
-      object.translatable_attributes.each do |attribute|
+      object.translatable_attribute_names.each do |attribute|
         source_text = object.read_attribute(attribute)
         translated_data[attribute.to_s] = translate_text(source_text, locale)
       end
