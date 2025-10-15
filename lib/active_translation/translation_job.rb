@@ -15,17 +15,12 @@ module ActiveTranslation
           locale: locale,
         )
 
-      existing_data =
-        begin
-          translation.translated_attributes.present? ? JSON.parse(translation.translated_attributes) : {}
-        rescue JSON::ParserError
-          {}
-        end
+      existing_data = translation.translated_attributes.present? ? translation.translated_attributes : {}
 
       merged_attributes = existing_data.merge(translated_data)
 
       translation.update!(
-        translated_attributes: merged_attributes.to_json,
+        translated_attributes: merged_attributes,
         source_checksum: checksum
       )
     end

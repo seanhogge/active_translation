@@ -6,7 +6,7 @@ module ActiveTranslation
       def translates(*attributes, manual: [], into:, unless: nil, if: nil)
         @translation_config ||= {}
         @translation_config[:attributes] = attributes
-        @translation_config[:manual_attributes] = Array(manual)
+        @translation_config[:manual_attributes] = Array(manual).map(&:to_s)
         @translation_config[:locales] = into
         @translation_config[:unless] = binding.local_variable_get(:unless)
         @translation_config[:if] = binding.local_variable_get(:if)
@@ -15,14 +15,31 @@ module ActiveTranslation
 
         delegate :translation_config, to: :class
         delegate :translatable_attribute_names, to: :class
-        delegate :translatable_locales, to: :class
 
         after_commit :translate_if_needed, on: [ :create, :update ]
 
         # Generate locale-specific methods such as fr_translation or de_translation
-        into.each do |locale|
-          define_method("#{locale}_translation") do
-            translations.find_by(locale: locale.to_s)
+        define_method(:method_missing) do |method_name, *args, &block|
+          super(method_name, *args, &block) unless method_name.to_s.split("_").size == 2
+
+          locale = method_name.to_s.split("_").first
+          attribute = method_name.to_s.split("_").last
+
+          if translation_config[:manual_attributes].include? attribute
+            translation = translations.find_by(locale: locale)
+            return read_attribute(attribute) unless translation
+
+            translation.translated_attributes[attribute].presence || read_attribute(attribute)
+          elsif attribute.last == "=" && translation_config[:manual_attributes].include?(attribute.delete("="))
+            attribute.delete!("=")
+            translation = translations.find_or_initialize_by(locale: locale.to_s)
+            attrs = translation.translated_attributes ? translation.translated_attributes : {}
+            attrs[attribute] = args.first
+            translation.translated_attributes = attrs
+            translation.source_checksum ||= translation_checksum
+            translation.save!
+          elsif attribute == "translation" || translation_config[:attributes].include?(attribute)
+            translations.find_by(locale: locale)
           end
         end
 
@@ -30,7 +47,7 @@ module ActiveTranslation
         attributes.each do |attr|
           define_method(attr) do |locale: nil|
             if locale && translation = translations.find_by(locale: locale.to_s)
-              JSON.parse(translation.translated_attributes)[attr.to_s]
+              translation.translated_attributes[attr.to_s]
             else
               super()
             end
@@ -41,27 +58,9 @@ module ActiveTranslation
         Array(manual).each do |attr|
           define_method("#{attr}") do |locale: nil|
             if locale && translation = translations.find_by(locale: locale.to_s)
-              JSON.parse(translation.translated_attributes)[attr.to_s].presence || read_attribute(attr)
+              translation.translated_attributes[attr.to_s].presence || read_attribute(attr)
             else
               read_attribute(attr)
-            end
-          end
-
-          into.each do |locale|
-            define_method("#{attr}_#{locale}=") do |value|
-              translation = translations.find_or_initialize_by(translatable_type: self.class.name, translatable_id: self.id, locale: locale.to_s)
-              attrs = translation.translated_attributes ? JSON.parse(translation.translated_attributes) : {}
-              attrs[attr.to_s] = value
-              translation.translated_attributes = attrs.to_json
-              translation.source_checksum ||= translation_checksum
-              translation.save!
-            end
-
-            define_method("#{attr}_#{locale}") do
-              translation = translations.find_by(locale: locale.to_s)
-              return read_attribute(attr) unless translation
-
-              JSON.parse(translation.translated_attributes)[attr.to_s].presence || read_attribute(attr)
             end
           end
         end
@@ -71,12 +70,19 @@ module ActiveTranslation
         translation_config[:attributes]
       end
 
-      def translatable_locales
-        translation_config[:locales]
-      end
-
       def translation_config
         @translation_config
+      end
+    end
+
+    def translatable_locales
+      case translation_config[:locales]
+      when Symbol
+        send(translation_config[:locales])
+      when Proc
+        instance_exec(&translation_config[:locales])
+      when Array
+        translation_config[:locales]
       end
     end
 
@@ -119,7 +125,7 @@ module ActiveTranslation
           next if read_attribute(attribute).blank?
 
           return true unless translation = translations.find_by(locale: locale)
-          return true unless JSON.parse(translation.translated_attributes).keys.include?(attribute)
+          return true unless translation.translated_attributes.keys.include?(attribute)
         end
       end
 

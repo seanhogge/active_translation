@@ -5,6 +5,8 @@ module ActiveTranslation
     validates :locale, presence: true, uniqueness: { scope: [ :translatable_type, :translatable_id ] }
     validates :source_checksum, presence: true
 
+    serialize :translated_attributes, coder: JSON
+
     def outdated?
       source_checksum != translatable.translation_checksum
     end

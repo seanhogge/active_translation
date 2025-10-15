@@ -67,6 +67,24 @@ Simplest form:
 translates :content, into: %i[es fr de]
 ```
 
+### Into
+
+The `into` argument can be an array of locales, a symbol that matches a method that returns an array of locales, or a Proc that returns an array of locales.
+
+So you could do:
+
+```ruby
+translates :content, into: :method_that_returns_locales
+```
+
+or
+
+```ruby
+translates :content, into: -> { I18n.available_locales.reject { it == I18n.default_locale } }
+```
+
+> `it` is a recent Ruby syntactical grain of sugar. It's the same as `_1` which lets you skip the `{ |arg| arg == :stuff }` repetition
+
 ### If Constraints
 
 An `if` constraint will prevent translating if it returns `false`.
@@ -115,7 +133,7 @@ So we need manual translation attributes:
 translates :content, manual: :name, into: %i[es fr]
 ```
 
-Manual attributes have a special setter in the form of `#{attribute_name}_#{locale}=`. So in this example, we get `name_fr=` and `name_es=`.
+Manual attributes have a special setter in the form of `#{locale}_#{attribute_name}`. So in this example, we get `fr_name=` and `es_name=`.
 
 These attributes never trigger retranslation, and are never checked against the original text - it's entirely up to you to maintain them. However, it does get stored alongside all the other translations, keeping your database tidy and your translation code consistent.
 
@@ -147,7 +165,7 @@ The same goes for manual translations:
 
 If the `es_translation` association exists, it will use the value for the `name` attribute, or the untranslated `name` if the `es_translation` doesn't exist.
 
-Obviously, you would probably pass the locale as `I18n.locale` in a real situation, or whatever variable or method that returns the relevant locale.
+At the risk of being obvious: in a real project, you would probably pass the locale as `I18n.locale`, or whatever variable or method that returns the relevant locale.
 
 
 ## Contributing

@@ -143,13 +143,6 @@ class TranslatableTest < ActiveSupport::TestCase
     end
   end
 
-  test "a model and an instance of it both respond to translatable_locales with the value from the 'into' argument of the 'translates' method" do
-    # employers(:hilton) has two locales: es and fr
-    assert Employer.translatable_locales == employers(:hilton).translatable_locales
-    assert Employer.translatable_locales == [ :es, :fr ]
-    assert employers(:hilton).translatable_locales == [ :es, :fr ]
-  end
-
   test "a model can be translated on demand asynchronously" do
     employer = employers(:hilton)
 
@@ -178,9 +171,10 @@ class TranslatableTest < ActiveSupport::TestCase
       assert_nil employer.send("#{locale}_translation")
     end
 
+    employer.translate_now!
+
     locales.each do |locale|
-      employer.translate_now!
-      assert employer.send("#{locale}_translation")
+      assert employer.send("#{locale}_translation"), "An employer should have a(n) #{locale}_translation after calling `translate_now!`".black.on_red
     end
   end
 
@@ -192,5 +186,20 @@ class TranslatableTest < ActiveSupport::TestCase
     assert_no_enqueued_jobs do
       employer.update profile_html: employer.profile_html
     end
+  end
+
+  test "a model can pass a symbol for the `into` argument to call as a method" do
+    employer = employers(:hilton)
+
+    assert employer.translatable_locales
+    assert employer.translatable_locales.is_a?(Array)
+    assert_equal employer.send(:method_that_returns_locales), employer.translatable_locales
+  end
+
+  test "a model can pass a Proc for the `into` argument" do
+    category = categories(:admin)
+
+    assert category.translatable_locales
+    assert category.translatable_locales.is_a?(Array)
   end
 end
