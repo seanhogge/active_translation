@@ -18,7 +18,10 @@ module ActiveTranslation
 
         after_commit :translate_if_needed, on: [ :create, :update ]
 
-        # Generate locale-specific methods such as fr_translation or de_translation
+        # Respond to calls for manual attribute retrieval (model.fr_attribute)
+        # Respond to calls for manual attribute assignment (model.fr_attribute = "Bonjour")
+        # Respond to calls such as fr_translation or de_translation
+        # Respond to calls such as model.name(locale: :fr)
         define_method(:method_missing) do |method_name, *args, &block|
           super() unless method_name.to_s.split("_").size == 2
 
