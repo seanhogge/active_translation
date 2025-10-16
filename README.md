@@ -213,9 +213,15 @@ By calling `translation_checksum`, you can return the checksum used on a model t
 
 By calling `translations_outdated?`, you can get `true` if any translation has a checksum that no longer matches the source (otherwise you get `false`).
 
-This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
+This has limited value, but is provided in case you need to handle situations in which models change without triggering callbacks.
 
 > NOTE: `translations_outdated?` will _always_ return `false` if the conditions you passed (`if` & `unless`) are not met
+
+##### outdated_translations
+
+By calling `outdated_translations`, you can get an array of all `translations` that are outdated.
+
+This has limited value, but is provided in case you need to handle situations in which models change without triggering callbacks.
 
 ##### translations_missing?
 
@@ -235,7 +241,7 @@ and you will get `false` if:
 - the `title` column has been fully translated but the `name` column has not been (manual attributes are ignored)
 - the `title` column has been fully translated, but the `title` column has changed since the translation in a way that doesn't trigger callbacks
 
-This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
+This has limited value, but is provided in case you need to handle situations in which models change without triggering callbacks.
 
 > NOTE: `translations_missing?` will _always_ return `false` if the conditions you passed (`if` & `unless`) are not met
 

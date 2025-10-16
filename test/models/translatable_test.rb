@@ -501,4 +501,29 @@ class TranslatableTest < ActiveSupport::TestCase
     assert job.fully_translated?(:all), "A job should return true for `fully_translated?` if its conditions aren't met".black.on_red
     assert page.fully_translated?(:all), "A page should return true for `fully_translated?` if its conditions aren't met".black.on_red
   end
+
+  test "`outdated_translations` returns an array of outdated translations based on checksum" do
+    employer = employers(:hilton)
+    employer.translate_now!
+
+    assert_not employer.translations_outdated?, "SETUP: The employer should start with current translations".black.on_yellow
+
+    employer.update_column(:profile_html, "New profile without triggering a callback")
+
+    assert_equal(
+      employer.translations,
+      employer.outdated_translations,
+      "All translations should be outdated after an update to a translated column that doesn't trigger callbacks".black.on_red,
+    )
+
+    employer.translate_now!(employer.translatable_locales.first)
+
+    employer.reload
+
+    assert_equal(
+      employer.translations.excluding(employer.translations.where(locale: employer.translatable_locales.first)),
+      employer.outdated_translations,
+      "Translations should be outdated if they don't match the new translatable attributes".black.on_red,
+    )
+  end
 end
