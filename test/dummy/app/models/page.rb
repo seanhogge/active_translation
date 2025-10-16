@@ -1,3 +1,3 @@
 class Page < ApplicationRecord
-  translates :title, :heading, :subhead, :content, into: %i[es fr], if: :published?
+  translates :title, :heading, :subhead, :content, into: :all, if: :published?
 end

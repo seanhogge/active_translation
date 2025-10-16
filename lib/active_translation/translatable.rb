@@ -5,7 +5,7 @@ module ActiveTranslation
     class_methods do
       def translates(*attributes, manual: [], into:, unless: nil, if: nil)
         @translation_config ||= {}
-        @translation_config[:attributes] = attributes
+        @translation_config[:attributes] = Array(attributes).map(&:to_s)
         @translation_config[:manual_attributes] = Array(manual).map(&:to_s)
         @translation_config[:locales] = into
         @translation_config[:unless] = binding.local_variable_get(:unless)
@@ -81,7 +81,11 @@ module ActiveTranslation
     def translatable_locales
       case translation_config[:locales]
       when Symbol
-        send(translation_config[:locales])
+        if translation_config[:locales] == :all
+          I18n.available_locales - [ I18n.default_locale ]
+        else
+          send(translation_config[:locales])
+        end
       when Proc
         instance_exec(&translation_config[:locales])
       when Array
@@ -179,7 +183,7 @@ module ActiveTranslation
     end
 
     def translatable_attributes_changed?
-      saved_changes.any? && saved_changes.keys.intersect?(translatable_attribute_names.map(&:to_s))
+      saved_changes.any? && saved_changes.keys.intersect?(translatable_attribute_names)
     end
 
     # returns true if condition is met or there is no condition

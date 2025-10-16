@@ -80,10 +80,16 @@ translates :content, into: :method_that_returns_locales
 or
 
 ```ruby
-translates :content, into: -> { I18n.available_locales.reject { it == I18n.default_locale } }
+translates :content, into: -> { I18n.available_locales - [ I18n.default_locale ] }
 ```
 
 > `it` is a recent Ruby syntactical grain of sugar. It's the same as `_1` which lets you skip the `{ |arg| arg == :stuff }` repetition
+
+#### Into All
+
+Because translating a model into all the locales your app may define is so common, you can pass `:all` to the `into` argument to achieve the same result as passing `-> { I18n.available_locales - [ I18n.default_locale ] }`.
+
+This means you cannot pass in your own method called "all" as a symbol, of course.
 
 ### If Constraints
 
@@ -166,6 +172,94 @@ The same goes for manual translations:
 If the `es_translation` association exists, it will use the value for the `name` attribute, or the untranslated `name` if the `es_translation` doesn't exist.
 
 At the risk of being obvious: in a real project, you would probably pass the locale as `I18n.locale`, or whatever variable or method that returns the relevant locale.
+
+
+### Extras
+
+There are a few niceties provided to make ActiveTranslation as flexible as possible.
+
+Ideal world: you won't need them.
+Real world: you might need them.
+
+#### Translate on Demand
+
+There may be times when things get hosed. You might need or want to translate the automatic columns manually. You can do this in three ways:
+
+**translate_if_needed**
+
+By calling `translate_if_needed`, you can run the same checks that would occur on update. This is similar to calling `touch`, but it doesn't update the `updated_at` timestamp
+
+**translate!**
+
+By calling `translate!`, you skip all checks for whether a translation is outdated or missing and generate a new translation even if it's already extant and accurate.
+
+**translate_now!(locales)**
+
+By calling `translate_now!` and passing 1 or more locales, you skip all checks for whether a translation is outdated or missing and generate a new translation for the passed locales even if they're already extant and accurate.
+
+**translation_checksum**
+
+By calling `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
+
+**translations_outdated?**
+
+By calling `translations_outdated?`, you can get a true/false if any translation has a checksum that no longer matches the source.
+
+This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
+
+**translations_missing?**
+
+By calling `translations_missing?`, you can get a true/false if any translations are missing. This is a complex question, and is false unless:
+
+- any automatic translation attributes are not blank
+- any automatic translation attributes are missing an entry for any locale
+
+So if you have `translates :title, manual: :name, into: :all` and your app supports `:fr` and `:es`, you will get `true` if:
+
+- the `title` has been translated into `:es`, but not `:fr`
+- no translations exist at all
+
+and you will get `false` if:
+
+- the `title` column is blank (`nil` or empty string)
+- the `title` column has been fully translated but the `name` column has not been (manual attributes are ignored)
+- the `title` column has been fully translated, but the `title` column has changed since the translation in a way that doesn't trigger callbacks
+
+This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
+
+
+#### Introspection
+
+You can call `translation_config` on a model or instance to see what you've set up for translations. You'll see something like:
+
+```ruby
+> Page.translation_config
+=> {attributes: [:title, :heading, :subhead, :content], manual_attributes: [], locales: :all, unless: nil, if: :published?}
+
+> Category.translation_config
+=> {attributes: [:name, :short_name],
+ manual_attributes: [],
+ locales: #<Proc:0x000000012231a2b8 /path/to/projects/active_translation/app/models/category.rb:67 (lambda)>,
+ unless: nil,
+ if: nil}
+
+> Widget.translation_config
+=> {attributes: [:title, :headline, :ad_html],
+ manual_attributes: [],
+ locales: [:es, :fr],
+ unless: #<Proc:0x00000001228fea58 /path/to/projects/active_translation/app/models/widget.rb:42 (lambda)>,
+ if: nil}
+
+> Widget.last.translation_config
+=> {attributes: [:title, :headline, :ad_html],
+ manual_attributes: [],
+ locales: [:es, :fr],
+ unless: #<Proc:0x00000001228fea58 /path/to/projects/active_translation/app/models/widget.rb:42 (lambda)>,
+ if: nil}
+
+> Account.translation_config
+=> {attributes: [:profile_html], manual_attributes: ["name"], locales: :method_that_returns_locales, unless: nil, if: nil}
+```
 
 
 ## Contributing

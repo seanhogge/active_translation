@@ -228,4 +228,32 @@ class TranslatableTest < ActiveSupport::TestCase
       "There should not be a #{skipped_locale}_translation after calling `translate_now!(#{specific_locale})`".black.on_red
     )
   end
+
+  test "a model can pass :all to `into` to use all available locales except the default" do
+    page = pages(:home_page)
+
+    assert_equal(
+      I18n.available_locales - [ I18n.default_locale ],
+      page.translatable_locales
+    )
+    assert_equal(
+      :all,
+      page.translation_config[:locales]
+    )
+  end
+
+  test "a model is translated on calling `touch`" do
+    category = categories(:admin)
+
+    assert_empty category.translations, "A category should start with no translations".black.on_yellow
+
+    perform_enqueued_jobs do
+      category.touch
+    end
+
+    assert_not_empty(
+      category.translations,
+      "A category should have translations after calling `touch`".black.on_red
+    )
+  end
 end
