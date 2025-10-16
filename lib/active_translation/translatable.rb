@@ -20,7 +20,7 @@ module ActiveTranslation
 
         # Generate locale-specific methods such as fr_translation or de_translation
         define_method(:method_missing) do |method_name, *args, &block|
-          super(method_name, *args, &block) unless method_name.to_s.split("_").size == 2
+          super() unless method_name.to_s.split("_").size == 2
 
           locale = method_name.to_s.split("_").first
           attribute = method_name.to_s.split("_").last
