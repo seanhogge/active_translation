@@ -189,13 +189,19 @@ There may be times when things get hosed. You might need or want to translate th
 
 By calling `translate_if_needed`, you can run the same checks that would occur on update. This is similar to calling `touch`, but it doesn't update the `updated_at` timestamp
 
+This will schedule the translation as a background job
+
 ##### translate!
 
 By calling `translate!`, you skip all checks for whether a translation is outdated or missing and generate a new translation even if it's already extant and accurate.
 
+This will schedule the translation as a background job.
+
 ##### translate_now!(locales)
 
 By calling `translate_now!` and passing 1 or more locales, you skip all checks for whether a translation is outdated or missing and generate a new translation for the passed locales even if they're already extant and accurate.
+
+This also does not schedule the job, and instead immediately performs the translation, blocking until the translations for all locales are complete.
 
 #### Introspecion
 
