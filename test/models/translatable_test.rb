@@ -202,4 +202,30 @@ class TranslatableTest < ActiveSupport::TestCase
     assert category.translatable_locales
     assert category.translatable_locales.is_a?(Array)
   end
+
+  test "a model can be `translated_now!` into a specific locale" do
+    employer = employers(:hilton)
+    specific_locale = employer.translatable_locales.first
+    skipped_locale = employer.translatable_locales.last
+
+    assert_empty employer.translations, "SETUP: the employer should start with no translations".black.on_yellow
+    assert_not_equal specific_locale, skipped_locale, "SETUP: the employer should have at least two `translatable_locales`".black.on_yellow
+
+    employer.translate_now!(specific_locale)
+
+    assert(
+      employer.send("#{specific_locale}_translation"),
+      "There should be a #{specific_locale}_translation after calling `translate_now!(#{specific_locale})`".black.on_red
+    )
+    assert_equal(
+      employer.translatable_attribute_names.map(&:to_s),
+      employer.send("#{specific_locale}_translation").translated_attributes.keys,
+      "There should be a #{specific_locale} version of `profile_html` after calling `translate_now!(#{specific_locale})`".black.on_red
+    )
+
+    assert_nil(
+      employer.send("#{skipped_locale}_translation"),
+      "There should not be a #{skipped_locale}_translation after calling `translate_now!(#{specific_locale})`".black.on_red
+    )
+  end
 end

@@ -106,8 +106,8 @@ module ActiveTranslation
       end
     end
 
-    def translate_now!
-      translatable_locales.each do |locale|
+    def translate_now!(locales = translatable_locales)
+      Array(locales).each do |locale|
         TranslationJob.perform_now(self, locale.to_s, translation_checksum)
       end
     end
