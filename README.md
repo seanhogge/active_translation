@@ -207,11 +207,11 @@ This also does not schedule the job, and instead immediately performs the transl
 
 ##### translation_checksum
 
-By callin `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
+By calling `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
 
 ##### translations_outdated?
 
-By callin `translations_outdated?`, you can get `false` if any translation has a checksum that no longer matches the source.
+By calling `translations_outdated?`, you can get `false` if any translation has a checksum that no longer matches the source.
 
 This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
 
