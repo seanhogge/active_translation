@@ -107,7 +107,7 @@ module ActiveTranslation
     end
 
     def outdated_translations
-      translations.select { it.outdated? }
+      translations.select { _1.outdated? }
     end
 
     def translatable_locales
