@@ -185,31 +185,35 @@ Real world: you might need them.
 
 There may be times when things get hosed. You might need or want to translate the automatic columns manually. You can do this in three ways:
 
-**translate_if_needed**
+##### translate_if_needed
 
 By calling `translate_if_needed`, you can run the same checks that would occur on update. This is similar to calling `touch`, but it doesn't update the `updated_at` timestamp
 
-**translate!**
+##### translate!
 
 By calling `translate!`, you skip all checks for whether a translation is outdated or missing and generate a new translation even if it's already extant and accurate.
 
-**translate_now!(locales)**
+##### translate_now!(locales)
 
 By calling `translate_now!` and passing 1 or more locales, you skip all checks for whether a translation is outdated or missing and generate a new translation for the passed locales even if they're already extant and accurate.
 
-**translation_checksum**
+#### Introspecion
 
-By calling `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
+##### translation_checksum
 
-**translations_outdated?**
+By callin `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
 
-By calling `translations_outdated?`, you can get a true/false if any translation has a checksum that no longer matches the source.
+##### translations_outdated?
+
+By callin `translations_outdated?`, you can get `false` if any translation has a checksum that no longer matches the source.
 
 This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
 
-**translations_missing?**
+> NOTE: `translations_outdated?` will _always_ return `false` if the conditions you passed (`if` & `unless`) are not met
 
-By calling `translations_missing?`, you can get a true/false if any translations are missing. This is a complex question, and is false unless:
+##### translations_missing?
+
+By calling `translations_missing?`, you can get `true` if any translations are missing. This is a complex question, and is false unless:
 
 - any automatic translation attributes are not blank
 - any automatic translation attributes are missing an entry for any locale
@@ -227,8 +231,27 @@ and you will get `false` if:
 
 This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
 
+> NOTE: `translations_missing?` will _always_ return `false` if the conditions you passed (`if` & `unless`) are not met
 
-#### Introspection
+##### fully_translated?(auto_or_manual_or_all)
+
+By calling `fully_translated?`, you can get `true` if all attributes are translated. This ignores manual attributes by default.
+
+There are some special symbols you can pass to change the scope of "fully." If you pass `:all` or `:include_manual`, then you will get `true` only if all automatic _and_ manual attributes have a translation.
+
+If you pass `:manual` or `:manual_only`, then you will get `true` only if all manual attributes have a translation, disregarding automatic attributes.
+
+Passing `:auto` or `:auto_only` is the same as passing no argument.
+
+Passing an invalid argument raises an error.
+
+> NOTE: `fully_translated?` will _always_ return `true` if the conditions you passed (`if` & `unless`) are not met
+
+##### translatable_locales
+
+By calling `translatable_locales`, you will get an array of locales for which the object will be translated. This has no bearing on whether any translations exist, or any conditions for translations to be performed.
+
+##### translation_config
 
 You can call `translation_config` on a model or instance to see what you've set up for translations. You'll see something like:
 

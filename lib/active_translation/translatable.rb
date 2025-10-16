@@ -127,6 +127,8 @@ module ActiveTranslation
     # translations are "missing" if they are not manual, the translatable attribute isn't blank
     # and there's no translation for that attribute for all locales
     def translations_missing?
+      return false unless conditions_met?
+
       translatable_locales.each do |locale|
         translatable_attribute_names.each do |attribute|
           next if read_attribute(attribute).blank?
@@ -139,7 +141,36 @@ module ActiveTranslation
       false
     end
 
+    def manual_translations_missing?
+      return false unless conditions_met?
+
+      translatable_locales.each do |locale|
+        translation_config[:manual_attributes].each do |attribute|
+          next if read_attribute(attribute).blank?
+
+          return true unless translation = translations.find_by(locale: locale)
+          return true unless translation.translated_attributes.keys.include?(attribute)
+        end
+      end
+
+      false
+    end
+
+    def fully_translated?(attribute_types = :auto)
+      case attribute_types
+      when :auto, :auto_only
+        !translations_missing?
+      when :manual, :manual_only
+        !manual_translations_missing?
+      when :all, :include_manual
+        !translations_missing? && !manual_translations_missing?
+      else
+        raise ArgumentError, "acceptable arguments are [:auto, :auto_only, :manual, :manual_only, :all, :include_manual]"
+      end
+    end
+
     def translations_outdated?
+      return false unless conditions_met?
       return true if translations.map(&:outdated?).any?
 
       false

@@ -59,7 +59,7 @@ class TranslatableTest < ActiveSupport::TestCase
   end
 
   test "a model with an unless (proc) constraint is translated when it's toggled to false, and untranslated when toggled to true" do
-    job = jobs(:chef)
+    job = jobs(:sales)
 
     perform_enqueued_jobs do
       job.update title: "new title"
@@ -255,5 +255,250 @@ class TranslatableTest < ActiveSupport::TestCase
       category.translations,
       "A category should have translations after calling `touch`".black.on_red
     )
+  end
+
+  test "translations_missing? is true if any automatic attributes are not translated" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert(
+      employer.translatable_locales.many?,
+      "SETUP: The employer should have more than one translatable locale".black.on_yellow
+    )
+
+    assert(
+      employer.translations_missing?,
+      "`translations_missing?` should be true when no translations are present".black.on_red
+    )
+
+    employer.translate_now!(locale: employer.translatable_locales.first)
+
+    assert(
+      employer.translations_missing?,
+      "`translations_missing?` should still be true when only some translations are present".black.on_red
+    )
+
+    employer.translate_now!
+
+    assert_not(
+      employer.translations_missing?,
+      "`translations_missing?` should be false when all translations are present".black.on_red
+    )
+  end
+
+  test "`manual_translations_missing?` is true if any automatic or manual attributes are not translated" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert(
+      employer.translatable_locales.many?,
+      "SETUP: The employer should have more than one translatable locale".black.on_yellow
+    )
+
+    assert(
+      employer.manual_translations_missing?,
+      "`translations_missing?(:all)` should be true when no translations are present".black.on_red
+    )
+
+    employer.send("#{employer.translatable_locales.first}_name=", :asdf)
+
+    assert(
+      employer.manual_translations_missing?,
+      "`translations_missing?(:all)` should be true when only one manual attribute translation is present".black.on_red
+    )
+
+    employer.translatable_locales.each do |locale|
+      employer.send("#{locale}_name=", :asdf)
+    end
+
+    assert_not(
+      employer.manual_translations_missing?,
+      "`translations_missing?(:all)` should be false when all manual attribute translations and no automatic attributes are present".black.on_red
+    )
+  end
+
+  test "fully_translated? is true if any automatic attributes are not translated" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert(
+      employer.translatable_locales.many?,
+      "SETUP: The employer should have more than one translatable locale".black.on_yellow
+    )
+
+    assert_not(
+      employer.fully_translated?,
+      "`fully_translated?` should be false when no translations are present".black.on_red
+    )
+
+    employer.translate_now!(locale: employer.translatable_locales.first)
+
+    assert_not(
+      employer.fully_translated?,
+      "`fully_translated?` should be false when only some translations are present".black.on_red
+    )
+
+    employer.translate_now!
+
+    assert(
+      employer.fully_translated?,
+      "`fully_translated?` should be true when all automatic attribute translations are present".black.on_red
+    )
+  end
+
+  test "`fully_translated(:manual)?` is true if all manual attributes are translated" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert(
+      employer.translatable_locales.many?,
+      "SETUP: The employer should have more than one translatable locale".black.on_yellow
+    )
+
+    assert_not(
+      employer.fully_translated?(:manual),
+      "`fully_translated?(:manual)` should be false when no translations are present".black.on_red
+    )
+
+    employer.send("#{employer.translatable_locales.first}_name=", :asdf)
+
+    assert_not(
+      employer.fully_translated?(:manual),
+      "`fully_translated?(:manual)` should be false when only one manual attribute translation is present".black.on_red
+    )
+
+    employer.translatable_locales.each do |locale|
+      employer.send("#{locale}_name=", :asdf)
+    end
+
+    assert(
+      employer.fully_translated?(:manual),
+      "`fully_translated?(:manual)` should be true when all manual attribute translations and no automatic attributes are present".black.on_red
+    )
+  end
+
+  test "`fully_translated(:all)?` is true if all manual and automatic attributes are translated" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert(
+      employer.translatable_locales.many?,
+      "SETUP: The employer should have more than one translatable locale".black.on_yellow
+    )
+
+    assert_not(
+      employer.fully_translated?(:all),
+      "`fully_translated?(:all)` should be false when no translations are present".black.on_red
+    )
+
+    employer.send("#{employer.translatable_locales.first}_name=", :asdf)
+
+    assert_not(
+      employer.fully_translated?(:all),
+      "`fully_translated?(:all)` should be false when only one manual attribute translation is present".black.on_red
+    )
+
+    employer.translate_now!(employer.translatable_locales.first)
+
+    assert_not(
+      employer.fully_translated?(:all),
+      "`fully_translated?(:all)` should be false when only one manual attribute translation and only one automatic attribute translation is present".black.on_red
+    )
+
+    employer.translatable_locales.each do |locale|
+      employer.send("#{locale}_name=", :asdf)
+    end
+    employer.translate_now!
+
+    assert(
+      employer.fully_translated?(:all),
+      "`fully_translated?(:all)` should be true when all manual attribute translations and all automatic attributes are present".black.on_red
+    )
+  end
+
+  test "passing an invalid argument to `fully_translated?` raises an ArgumentError" do
+    employers(:hilton).fully_translated?(:auto)
+    employers(:hilton).fully_translated?(:auto_only)
+    employers(:hilton).fully_translated?(:manual)
+    employers(:hilton).fully_translated?(:manual_only)
+    employers(:hilton).fully_translated?(:all)
+    employers(:hilton).fully_translated?(:include_manual)
+    employers(:hilton).fully_translated?
+
+    assert_raises ArgumentError do
+      employers(:hilton).fully_translated?(:not_a_valid_argument)
+    end
+  end
+
+  test "`translations_missing?` is false if conditions are not met" do
+    job = jobs(:sales)
+    page = pages(:home_page)
+
+    assert_equal "draft", job.posted_status, "SETUP: The job should be in draft status".black.on_yellow
+    assert_empty(
+      job.translations,
+      "SETUP: The job should start with no translations present".black.on_yellow,
+    )
+    assert_empty(
+      page.translations,
+      "SETUP: The page should start with no translations present".black.on_yellow,
+    )
+
+    assert_not job.translations_missing?, "A job should return false for `translations_missing?` if its conditions aren't met".black.on_red
+    assert_not page.translations_missing?, "A page should return false for `translations_missing?` if its conditions aren't met".black.on_red
+  end
+
+  test "`manual_translations_missing?` is false if conditions are not met" do
+    job = jobs(:sales)
+    page = pages(:home_page)
+
+    assert_equal "draft", job.posted_status, "SETUP: The job should be in draft status".black.on_yellow
+    assert_empty(
+      job.translations,
+      "SETUP: The job should start with no translations present".black.on_yellow,
+    )
+    assert_empty(
+      page.translations,
+      "SETUP: The page should start with no translations present".black.on_yellow,
+    )
+
+    assert_not job.manual_translations_missing?, "A job should return false for `manual_translations_missing?` if its conditions aren't met".black.on_red
+    assert_not page.manual_translations_missing?, "A page should return false for `manual_translations_missing?` if its conditions aren't met".black.on_red
+  end
+
+  test "`fully_translated?` is true if conditions are not met" do
+    job = jobs(:sales)
+    page = pages(:home_page)
+
+    assert_equal "draft", job.posted_status, "SETUP: The job should be in draft status".black.on_yellow
+    assert_empty(
+      job.translations,
+      "SETUP: The job should start with no translations present".black.on_yellow,
+    )
+    assert_empty(
+      page.translations,
+      "SETUP: The page should start with no translations present".black.on_yellow,
+    )
+
+    assert job.fully_translated?, "A job should return true for `fully_translated?` if its conditions aren't met".black.on_red
+    assert page.fully_translated?, "A page should return true for `fully_translated?` if its conditions aren't met".black.on_red
+  end
+
+  test "`fully_translated?(:all)` is true if conditions are not met" do
+    job = jobs(:sales)
+    page = pages(:home_page)
+
+    assert_equal "draft", job.posted_status, "SETUP: The job should be in draft status".black.on_yellow
+    assert_empty(
+      job.translations,
+      "SETUP: The job should start with no translations present".black.on_yellow,
+    )
+    assert_empty(
+      page.translations,
+      "SETUP: The page should start with no translations present".black.on_yellow,
+    )
+
+    assert job.fully_translated?(:all), "A job should return true for `fully_translated?` if its conditions aren't met".black.on_red
+    assert page.fully_translated?(:all), "A page should return true for `fully_translated?` if its conditions aren't met".black.on_red
   end
 end

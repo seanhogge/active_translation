@@ -4,10 +4,10 @@ chef:
   title: Chef
   headline: Join us for a job that really cooks
   ad_html: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam eleifend eros convallis dolor sodales, vel semper nunc interdum. Nam velit nibh, vehicula auctor orci ac, viverra vulputate tortor. Fusce dignissim nunc eget tellus elementum tincidunt. Cras rhoncus nunc sed felis rutrum, sit amet venenatis enim pharetra. Donec turpis lorem, viverra non sem vel, bibendum varius risus. Curabitur imperdiet sed sapien fermentum tempus. Mauris tortor enim, cursus id elit eu, ultrices aliquet felis. Etiam quam ex, imperdiet nec laoreet ornare, pellentesque sed turpis. Integer a mauris eget ipsum euismod consequat consectetur non augue. Suspendisse ac velit lorem. Nam sagittis commodo ligula id blandit. Vestibulum commodo nisl lacus. Sed pretium, justo ac ullamcorper fringilla, augue elit fermentum nisl, vitae euismod ligula libero id libero. Aenean turpis libero, auctor eget mauris id, posuere interdum eros. In lacus ante, ullamcorper non risus a, laoreet ultricies mauris. Sed quis ullamcorper nibh.
-  posted_status: true
+  posted_status: posted
 
 sales:
   title: Sales Manager
   headline: Join us and reel in the guests
   ad_html: Vestibulum et velit iaculis, lobortis eros at, ultricies nisi. Ut maximus commodo metus, vel gravida massa scelerisque vel. Praesent at auctor diam. In efficitur efficitur neque. Sed augue elit, vehicula et lorem vitae, sagittis malesuada lectus. Mauris in tempor massa. Duis hendrerit feugiat dictum. Suspendisse sit amet lorem magna. Aenean sollicitudin neque ut ex vehicula, vel condimentum tortor facilisis. Curabitur neque leo, suscipit sit amet tincidunt a, vestibulum et sapien. Sed pretium lectus id tincidunt gravida. Etiam tempus risus ac facilisis laoreet. Fusce consequat felis vitae imperdiet faucibus. Sed bibendum volutpat malesuada. Vestibulum consequat ex in mi consequat laoreet. Nunc pellentesque nisl quis justo mollis, eget aliquam felis venenatis.
-  posted_status: false
+  posted_status: draft
