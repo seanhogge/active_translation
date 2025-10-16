@@ -211,7 +211,7 @@ By calling `translation_checksum`, you can return the checksum used on a model t
 
 ##### translations_outdated?
 
-By calling `translations_outdated?`, you can get `false` if any translation has a checksum that no longer matches the source.
+By calling `translations_outdated?`, you can get `true` if any translation has a checksum that no longer matches the source (otherwise you get `false`).
 
 This has limited value, but is exposed in case you need to handle situations in which models change without triggering callbacks.
 
@@ -219,7 +219,7 @@ This has limited value, but is exposed in case you need to handle situations in 
 
 ##### translations_missing?
 
-By calling `translations_missing?`, you can get `true` if any translations are missing. This is a complex question, and is false unless:
+By calling `translations_missing?`, you can get `true` if any translations are missing. This is a complex question, and is `false` unless:
 
 - any automatic translation attributes are not blank
 - any automatic translation attributes are missing an entry for any locale
