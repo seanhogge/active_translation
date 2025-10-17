@@ -131,7 +131,7 @@ module ActiveTranslation
       return unless translatable_attributes_changed? || condition_checks_changed? || translations_outdated? || translations_missing?
 
       translatable_locales.each do |locale|
-        translation = translations.find_or_initialize_by(locale: locale.to_s, source_checksum: :outdated)
+        translation = translations.find_or_create_by(locale: locale.to_s, source_checksum: :outdated)
 
         if translation.new_record? || translation.outdated?
           TranslationJob.perform_later(self, locale.to_s, translation_checksum)
