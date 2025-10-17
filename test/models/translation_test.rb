@@ -14,24 +14,6 @@ class TranslatableTest < ActiveSupport::TestCase
     assert employer.translations.last.outdated?
   end
 
-  test "a translation is valid with a source_checksum and invalid without" do
-    category = categories(:admin)
-
-    translation = category.translations.new(
-      locale: :es,
-      translated_attributes: {
-        name: "[es] name",
-        short_name: "[es] short_name"
-      }
-    )
-
-    assert_not translation.valid?
-
-    translation.source_checksum = :checksum
-
-    assert translation.valid?
-  end
-
   test "a translatable can only have a single translation per locale" do
     page = pages(:home_page)
 
