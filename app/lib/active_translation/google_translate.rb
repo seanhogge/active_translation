@@ -18,7 +18,7 @@ module ActiveTranslation
             {
               q: text,
               target: target_language_code,
-              source: source
+              source: source,
             }
           )
 

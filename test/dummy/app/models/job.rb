@@ -4,6 +4,6 @@ class Job < ApplicationRecord
   enum :posted_status, {
     draft: "draft",
     posted: "posted",
-    expired: "expired"
+    expired: "expired",
   }
 end

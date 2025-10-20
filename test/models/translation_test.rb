@@ -26,7 +26,7 @@ class TranslatableTest < ActiveSupport::TestCase
         title: :asdf,
         heading: :asdf,
         subhead: :asdf,
-        content: :asdf
+        content: :asdf,
       }
     )
 

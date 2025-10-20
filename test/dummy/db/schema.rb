@@ -19,8 +19,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_194255) do
     t.string "source_checksum"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["translatable_type", "translatable_id", "locale"], name: "index_translations_on_translatable_and_locale", unique: true
-    t.index ["translatable_type", "translatable_id"], name: "index_active_translation_translations_on_translatable"
+    t.index [ "translatable_type", "translatable_id", "locale" ], name: "index_translations_on_translatable_and_locale", unique: true
+    t.index [ "translatable_type", "translatable_id" ], name: "index_active_translation_translations_on_translatable"
   end
 
   create_table "categories", force: :cascade do |t|
