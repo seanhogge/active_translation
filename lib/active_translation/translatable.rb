@@ -39,7 +39,6 @@ module ActiveTranslation
             attrs = translation.translated_attributes ? translation.translated_attributes : {}
             attrs[attribute] = args.first
             translation.translated_attributes = attrs
-            translation.source_checksum ||= translation_checksum
             translation.save!
           elsif attribute == "translation" || translation_config[:attributes].include?(attribute)
             translations.find_by(locale: locale)

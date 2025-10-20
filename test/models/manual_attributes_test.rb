@@ -45,7 +45,7 @@ class ManualAttributesTest < ActiveSupport::TestCase
       employer.fr_name = "[fr] a new name"
     end
 
-    assert_equal previous_checksum, employer.translations.first.source_checksum
+    assert_nil employer.translations.first.source_checksum
   end
 
   test "manual attributes should fall back to the regular attribute if translations don't exist" do

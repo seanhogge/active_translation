@@ -526,4 +526,31 @@ class TranslatableTest < ActiveSupport::TestCase
       "Translations should be outdated if they don't match the new translatable attributes".black.on_red,
     )
   end
+
+  test "a record with a manual translation is still translated if needed" do
+    employer = employers(:hilton)
+
+    assert_empty employer.translations, "SETUP: The employer should start with no translations".black.on_yellow
+    assert employer.translations_missing?, "SETUP: The employer should start with translations_missing? as `true`".black.on_yellow
+    assert_not employer.fully_translated?, "SETUP: The employer should start with fully_translated? as `false`".black.on_yellow
+
+    employer.fr_name = "french name"
+
+    assert_not_empty employer.translations, "The employer should have at least 1 translation after a manual translation assignment".black.on_red
+    assert_not_equal employer.name, employer.name(locale: :fr), "The employer should have a different name in the :fr locale".black.on_red
+    assert_empty employer.translations.where(locale: :es), "The employer should not have any :es translations after adding a manual :fr translation".black.on_red
+    assert_equal employer.name, employer.name(locale: :es), "The employer's :es name should be the same as the english name since no :es name has been provided".black.on_red
+
+    perform_enqueued_jobs do
+      employer.translate_if_needed
+    end
+
+    employer.reload
+
+    assert employer.fully_translated?, "The employer should be fully_translated after calling `translate_if_needed`".black.on_red
+    assert_not_equal employer.name, employer.name(locale: :fr), "The employer should have a different name in the :fr locale after being auto translated".black.on_red
+    assert_not_equal employer.profile_html, employer.profile_html(locale: :fr), "The employer should have a different profile_html in the :fr locale after auto translation".black.on_red
+    assert_not_equal employer.profile_html, employer.profile_html(locale: :es), "The employer should have a different profile_html in the :es locale after auto translation".black.on_red
+    assert_not_empty employer.translations.where(locale: :es), "The employer should have :es translations after auto translation".black.on_red
+  end
 end
