@@ -1,6 +1,21 @@
 # ActiveTranslation
 
-ActiveTranslation lets you easily translate ActiveRecord models. With a single line added to that model, you can declare which columns, which locales, and what constraints to allow or prevent translation.
+ActiveTranslation is a Rails plugin that lets you easily translate ActiveRecord models. With a single line added to that model, you can declare which columns, which locales, and what constraints to allow or prevent translation.
+
+ActiveTranslation was built at and is sponsored by [Talentronic](https://talentronic.com)
+
+
+## How does this differ from internationalization (`I18n`)?
+
+I18n is a great solution for elements of your app that are static, nearly static, aren't database-driven, or otherwise can be controlled or constrained in some fashion.
+
+It can't help you if you have something that's user-supplied. It can't help you if you need translations available without a deploy, on demand.
+
+Even in instances where it can help you, there are times when having hundreds of lines of YAML can become tedious or difficult to maintain.
+
+Consider something like product categories: you might allow product managers to create them as needed. If you want them translated, you now need to communicate this to someone who can update the translation files. It's not difficult or tedious at first.
+
+Instead, what if you just add a single line to your `Category` model. Now product managers can create new categories with whimsical abandon, and your international customers don't have to wait for engineering or a third party to copy/paste into a `.yml` file.
 
 
 ## Installation
@@ -262,6 +277,8 @@ Passing an invalid argument raises an error.
 ##### translatable_locales
 
 By calling `translatable_locales`, you will get an array of locales for which the object will be translated. This has no bearing on whether any translations exist, or any conditions for translations to be performed.
+
+> NOTES: This is only defined on instances of a model, not the model itself, since the `into` argument allows more than just an Array literal.
 
 ##### translation_config
 

@@ -50,7 +50,7 @@ module ActiveTranslation
         attributes.each do |attr|
           define_method(attr) do |locale: nil|
             if locale && translation = translations.find_by(locale: locale.to_s)
-              translation.translated_attributes[attr.to_s]
+              translation.translated_attributes&.dig attr.to_s || super()
             else
               super()
             end
