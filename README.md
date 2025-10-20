@@ -314,9 +314,23 @@ You can call `translation_config` on a model or instance to see what you've set 
 ```
 
 
+## Testing
+
+Ideally, you do not need to write any tests for translations or how they behave, since ActiveTranslation tests itself.
+
+However, perhaps you bolt on additional functionality to tests, or translations are critical to your application, or you simply want to ensure you're expecting the correct results from using the gem. In that case, ActiveTranslation provides some simple testing features.
+
+All translations skip the call to Google in the test environment, and return a simple modification of that content. For example, translating into the `:fr` locale in a test environment would behave as so:
+
+- Input: "auto translated content from ActiveRecord object"
+- Output: "[fr] auto translated content from ActiveRecord object"
+
+
 ## Contributing
 
 Fork the repo, make your changes, make a pull request.
+
+Or simply report issues on the [GitHub repository](https://github.com/seanhogge/active_translation)
 
 
 ## License
