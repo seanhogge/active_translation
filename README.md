@@ -1,3 +1,12 @@
+# WARNING KLAXON WARNING
+
+🚨 ActiveTranslation is pre-1.0 🚨
+
+This means there may be unhandled edge cases and undiscovered bugs. Please don't use it in production without rigorous QA.
+
+If you find a bug or problem, please report it. If you have an idea for a new feature, please suggest it.
+
+
 # ActiveTranslation
 
 ActiveTranslation is a Rails plugin that lets you easily translate ActiveRecord models. With a single line added to that model, you can declare which columns, which locales, and what constraints to allow or prevent translation.
