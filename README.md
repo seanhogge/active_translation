@@ -214,9 +214,11 @@ This will schedule the translation as a background job.
 
 ##### translate_now!(locales)
 
-By calling `translate_now!` and passing 1 or more locales, you skip all checks for whether a translation is outdated or missing and generate a new translation for the passed locales even if they're already extant and accurate.
+By calling `translate_now!` and optionally passing 1 or more locales, you skip all checks for whether a translation is outdated or missing and generate a new translation for the passed locales even if they're already extant and accurate.
 
-This also does not schedule the job, and instead immediately performs the translation, blocking until the translations for all locales are complete.
+The default value for locales is `translatable_locales`, so if you don't pass anything, it will translate into all locales defined for that model.
+
+This method does **not** schedule the job, and instead immediately performs the translation, blocking until the translations for all locales are complete.
 
 #### Introspecion
 
