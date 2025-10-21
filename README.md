@@ -220,7 +220,9 @@ The default value for locales is `translatable_locales`, so if you don't pass an
 
 This method does **not** schedule the job, and instead immediately performs the translation, blocking until the translations for all locales are complete.
 
-#### Introspecion
+#### Introspection
+
+The goal of ActiveTranslation is to make translations as automatic and invisible as possible. However, there may be times when you need to know the state of translations on a model instance.
 
 ##### translation_checksum
 
