@@ -247,26 +247,27 @@ This has limited value, but is provided in case you need to handle situations in
 By calling `translations_missing?`, you can get `true` if any translations are missing. This is a complex question, and is `false` unless:
 
 - any automatic translation attributes are not blank
-- any automatic translation attributes are missing an entry for any locale
+- any automatic translation attributes are missing an entry for any locale (in addition to not being blank)
 
 So if you have `translates :title, manual: :name, into: :all` and your app supports `:fr` and `:es`, you will get `true` if:
 
 - the `title` has been translated into `:es`, but not `:fr`
 - no translations exist at all
+- the `name` has been translated into both `:es` and `:fr` but `title` hasn't been translated
+- the `name` has been translated into both `:es` and `:fr` but `title` has been translated into only one locale
 
 and you will get `false` if:
 
+- translations conditions are not met, regardless of the presence or absence of any translations
 - the `title` column is blank (`nil` or empty string)
 - the `title` column has been fully translated but the `name` column has not been (manual attributes are ignored)
 - the `title` column has been fully translated, but the `title` column has changed since the translation in a way that doesn't trigger callbacks
 
 This has limited value, but is provided in case you need to handle situations in which models change without triggering callbacks.
 
-> NOTE: `translations_missing?` will _always_ return `false` if the conditions you passed (`if` & `unless`) are not met
-
 ##### fully_translated?(auto_or_manual_or_all)
 
-By calling `fully_translated?`, you can get `true` if all attributes are translated. This ignores manual attributes by default.
+By calling `fully_translated?` with no arguments, you can get `true` if all attributes are translated. This ignores manual attributes by default.
 
 There are some special symbols you can pass to change the scope of "fully." If you pass `:all` or `:include_manual`, then you will get `true` only if all automatic _and_ manual attributes have a translation.
 
@@ -317,6 +318,13 @@ You can call `translation_config` on a model or instance to see what you've set 
 => {attributes: [:profile_html], manual_attributes: ["name"], locales: :method_that_returns_locales, unless: nil, if: nil}
 ```
 
+#### Disclaimer
+
+ActiveTranslation doesn't check the accuracy of translations in any way. It assumes that the response from Google is always perfect. If you are translating sensitive content where accuracy is critical in a legal or existential sense, you must handle translation auditing separately.
+
+So if you use the for an EULA, make it a manual attribute or don't use ActiveTranslation for it at all.
+
+ActiveTranslation doesn't redact any content. It assumes you would never send PII or financial data for translation. So... please don't.
 
 ## Testing
 
