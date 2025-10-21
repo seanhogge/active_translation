@@ -226,7 +226,7 @@ The goal of ActiveTranslation is to make translations as automatic and invisible
 
 ##### translation_checksum
 
-By calling `translation_checksum`, you can return the checksum used on a model to determine whether translations are outdated.
+By calling `translation_checksum`, you can return the checksum used on a record to determine whether translations are outdated.
 
 ##### translations_outdated?
 
