@@ -177,7 +177,9 @@ If you set:
 translates :content, manual: :name, into: %i[es fr]
 ```
 
-on a model like `Post`, then you can do this with an instance of `Post` assigned to `@post`:
+on a `Post` model, then you can simply call `.content` and it will use the current locale from Rails `I18n`.
+
+If you need the value for a locale other than the current, you can specify the locale explicitly:
 
 ```ruby
 @post.content(locale: :fr)
@@ -190,12 +192,16 @@ In this way, you'll never have missing values, but you will have the default lan
 The same goes for manual translations:
 
 ```ruby
+@post.name
+```
+
+returns the translated name for the current locale if it exists, or the untranslated `name` if it does.
+
+```ruby
 @post.name(locale: :es)
 ```
 
-If the `es_translation` association exists, it will use the value for the `name` attribute, or the untranslated `name` if the `es_translation` doesn't exist.
-
-At the risk of being obvious: in a real project, you would probably pass the locale as `I18n.locale`, or whatever variable or method that returns the relevant locale.
+Regardless of the current locale, it will return the `:es` translated value for the `name` attribute, or the untranslated `name` if the `es_translation` doesn't exist.
 
 
 ### Extras

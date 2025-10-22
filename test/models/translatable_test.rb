@@ -553,4 +553,26 @@ class TranslatableTest < ActiveSupport::TestCase
     assert_not_equal employer.profile_html, employer.profile_html(locale: :es), "The employer should have a different profile_html in the :es locale after auto translation".black.on_red
     assert_not_empty employer.translations.where(locale: :es), "The employer should have :es translations after auto translation".black.on_red
   end
+
+  test "calling a translated attribute automatically uses the current locale" do
+    employer = employers(:hilton)
+
+    perform_enqueued_jobs do
+      employer.update profile_html: "Profile content"
+    end
+
+    assert_equal "Profile content", employer.profile_html, "The profile_html method should return the original content when no locale is specified".black.on_red
+
+    I18n.with_locale(:fr) do
+      assert_equal "[fr] Profile content", employer.profile_html, "The profile_html method should return the translated content for the current locale".black.on_red
+    end
+
+    I18n.with_locale(:es) do
+      assert_equal "[es] Profile content", employer.profile_html, "The profile_html method should return the translated content for the current locale".black.on_red
+    end
+
+    I18n.with_locale(:en) do
+      assert_equal "Profile content", employer.profile_html, "The profile_html method should return the original content for the default locale".black.on_red
+    end
+  end
 end

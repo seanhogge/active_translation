@@ -1,3 +1,5 @@
+require "test_helper"
+
 class ManualAttributesTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
@@ -99,5 +101,23 @@ class ManualAttributesTest < ActiveSupport::TestCase
     assert_not_nil employer.es_translation
     assert_equal employer.name, employer.es_name, "Calling es_name should return the employer name when an es_translation exists without the name attribute".black.on_red
     assert_equal employer.name, employer.name(locale: :es), "Calling name(locale: :es) should return the employer name when an es_translation exists without the name attribute".black.on_red
+  end
+
+  test "calling a manual attribute automatically uses the current locale" do
+    employer = employers(:hilton)
+
+    perform_enqueued_jobs do
+      employer.fr_name = "[fr] Hilton"
+    end
+
+    assert_equal employer.name, employer.name, "When the locale is the default, calling name should return the default name".black.on_red
+
+    I18n.with_locale(:fr) do
+      assert_equal "[fr] Hilton", employer.name, "When the locale is :fr, calling name should return the fr translation".black.on_red
+    end
+
+    I18n.with_locale(:es) do
+      assert_equal employer.name, employer.name, "When the locale is :es, calling name should return the default name when no es translation exists".black.on_red
+    end
   end
 end

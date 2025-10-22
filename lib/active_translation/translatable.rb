@@ -45,9 +45,9 @@ module ActiveTranslation
           end
         end
 
-        # Override attribute methods so that they accept a locale argument
+        # Override attribute methods so that they accept a locale argument (defaulting to current I18n locale)
         attributes.each do |attr|
-          define_method(attr) do |locale: nil|
+          define_method(attr) do |locale: I18n.locale|
             if locale && translation = translations.find_by(locale: locale.to_s)
               translation.translated_attributes&.dig attr.to_s || super()
             else
@@ -56,9 +56,9 @@ module ActiveTranslation
           end
         end
 
-        # set up the methods for the manually translated attributes
+        # Override manual attribute methods so that they accept a locale argument (defaulting to current I18n locale)
         Array(manual).each do |attr|
-          define_method("#{attr}") do |locale: nil|
+          define_method("#{attr}") do |locale: I18n.locale|
             if locale && translation = translations.find_by(locale: locale.to_s)
               translation.translated_attributes[attr.to_s].presence || read_attribute(attr)
             else
