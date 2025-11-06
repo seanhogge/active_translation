@@ -1,11 +1,11 @@
 PATH
   remote: .
   specs:
-    active_translation (0.7.1)
-      activerecord (>= 7)
-      faraday
-      googleauth
-      rails (>= 7)
+    active_translation (0.7.2)
+      activerecord (>= 7.0, < 9)
+      faraday (~> 2.0, >= 2.7.0)
+      googleauth (~> 1.0, >= 1.4.0)
+      rails (>= 7.0, < 9)
 
 GEM
   remote: https://rubygems.org/

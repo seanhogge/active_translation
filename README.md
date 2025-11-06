@@ -1,3 +1,6 @@
+[![Gem Version](https://badge.fury.io/rb/active_translation.svg)](https://badge.fury.io/rb/active_translation)
+
+
 # WARNING KLAXON WARNING
 
 🚨 ActiveTranslation is pre-1.0 🚨

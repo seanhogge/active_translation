@@ -31,7 +31,6 @@ module ActiveTranslation
 
       def parse_response(response)
         response.body.dig("data", "translations", 0, "translatedText")
-        # CGI.unescapeHTML(translation) if translation.is_a?(String)
       end
 
       def token
